@@ -38,7 +38,7 @@ int main() {
             perror("Failed to read");
             close(fd);
             return 1;
-        } 
+        }
         else if (ret == 1) {
             if (write(1, &c, 1) < 0) {
                 perror("Failed to write");
@@ -48,7 +48,11 @@ int main() {
         }
     }
 
-    write(1, "\n", 1);
+    if (write(1, "\n", 1) < 0) {
+        perror("Failed to write");
+        close(fd);
+        return 1;
+    }
 
     close(fd);
 

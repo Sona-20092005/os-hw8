@@ -6,7 +6,7 @@
 int main() {
     int fd;
     char number;
-    char buffer[256];
+    char buffer[128];
     ssize_t ret;
     off_t position = 0;
 
@@ -25,6 +25,7 @@ int main() {
             close(fd);
             return 1;
         }
+
         if (write(fd, "\n", 1) < 0) {
             perror("Failed to write");
             close(fd);
@@ -41,6 +42,7 @@ int main() {
     close(fd);
 
     fd = open("numbers.txt", O_RDWR);
+
     if (fd < 0) {
         perror("Failed to open");
         return 1;
@@ -48,10 +50,18 @@ int main() {
 
     int count = 0;
     char ch;
+
     while (count < 3) {
         ret = read(fd, &ch, 1);
+
         if (ret < 0) {
             perror("Failed to read");
+            close(fd);
+            return 1;
+        }
+
+        if (ret == 0) {
+            printf("File does not contain enough lines.\n");
             close(fd);
             return 1;
         }
@@ -70,6 +80,7 @@ int main() {
     }
 
     ssize_t remainder_size = read(fd, buffer, sizeof(buffer));
+
     if (remainder_size < 0) {
         perror("Failed to read");
         close(fd);
@@ -82,8 +93,17 @@ int main() {
         return 1;
     }
 
-    write(fd, "100\n", 4);
-    write(fd, buffer, remainder_size);
+    if (write(fd, "100\n", 4) < 0) {
+        perror("Failed to write");
+        close(fd);
+        return 1;
+    }
+
+    if (write(fd, buffer, remainder_size) < 0) {
+        perror("Failed to write");
+        close(fd);
+        return 1;
+    }
 
     if (lseek(fd, 0, SEEK_SET) < 0) {
         perror("Failed lseek");
@@ -91,16 +111,20 @@ int main() {
         return 1;
     }
 
-    ret = read(fd, buffer, sizeof(buffer));
+    ret = read(fd, buffer, sizeof(buffer) - 1);
+
     if (ret < 0) {
         perror("Failed to read final content");
         close(fd);
         return 1;
     }
 
-    printf("Final file content:\n%s\n", buffer);
+    buffer[ret] = '\0';
+
+    printf("Final file content:\n%s", buffer);
 
     close(fd);
 
     return 0;
 }
+

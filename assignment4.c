@@ -25,12 +25,13 @@ int main() {
         perror("Failed to read");
         close(fd);
         return 1;
-    } 
-    else if (nr_read > 0) {
-        if (input[nr_read - 1] == '\n') {
-            nr_read--;
-        }  
-    } 
+    }
+    for (int i = 0; i < nr_read; i++) {
+        if (input[i] == '\n') {
+            nr_read = i;
+            break;
+        }
+    }
 
     len = sprintf(prefix, "PID=%ld: ", (long)getpid());
 
@@ -39,21 +40,21 @@ int main() {
         perror("Failed to write");
         close(fd);
         return 1;
-    } 
+    }
 
     nr_write = write(fd, input, nr_read);
     if (nr_write < 0) {
         perror("Failed to write");
         close(fd);
         return 1;
-    } 
+    }
 
     nr_write = write(fd, "\n", 1);
     if (nr_write < 0) {
         perror("Failed to write");
         close(fd);
         return 1;
-    } 
+    }
 
 
     position = lseek(fd, 0, SEEK_CUR);
@@ -66,6 +67,10 @@ int main() {
     printf("Final file offset: %ld\n", (long)position);
 
     close(fd);
+
+    // O_APPEND makes sure that each write adds new data to the end of the file.
+    // After writing to that file, the current pointer/offser advances to the new end of that file.
+    // And so SEEK_CUR returns this current pointer/offset.
 
     return 0;
 }

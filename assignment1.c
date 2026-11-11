@@ -4,13 +4,11 @@
 #include <errno.h>
 #include <unistd.h>
 
-extern int errno;
-
 int main() {
     int source_fd, destination_fd;
     char source[256];
     char destination[256];
-    char buffer[1024];
+    char buffer[256];
     ssize_t ret;
     ssize_t total_bytes = 0;
 
@@ -22,13 +20,13 @@ int main() {
 
     source_fd = open(source, O_RDONLY);
     if (source_fd == -1) {
-        perror("Failed to open source\n");
+        perror("Failed to open source");
         return 1;
     }
 
     destination_fd = open(destination, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (destination_fd == -1) {
-        perror("Failed to open destination\n");
+        perror("Failed to open destination");
         close(source_fd);
         return 1;
     }
@@ -42,7 +40,7 @@ int main() {
                 if (errno == EINTR) {
                     continue;
                 }
-                perror("Failed read\n");
+                perror("Failed read");
                 close(source_fd);
                 close(destination_fd);
                 return 1;
@@ -63,7 +61,7 @@ int main() {
                 if (errno == EINTR) {
                     continue;
                 }
-                perror("Failed write\n");
+                perror("Failed write");
                 close(source_fd);
                 close(destination_fd);
                 return 1;
@@ -74,7 +72,7 @@ int main() {
         }
 
         if (len != 0) {
-            perror("Write returned 0\n");
+            perror("Write returned 0");
             close(source_fd);
             close(destination_fd);
             return 1;
@@ -86,7 +84,7 @@ int main() {
             break;
         }
     }
-       
+
     printf("File copied successfully!\n");
     printf("Total bytes copied: %zd\n", total_bytes);
 
@@ -94,4 +92,3 @@ int main() {
     close(destination_fd);
     return 0;
 }
-

@@ -50,5 +50,9 @@ int main() {
 
     close(fd);
 
+    // lseek() moves the file position forward without actually writing data.
+    // This creates a hole and while reading we can see 0s but in reality since there is
+    // no data, the filesystem just avoids allocating memory for it, and hence the disk usage
+    // is lower than the apparent file size
     return 0;
 }
